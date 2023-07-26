@@ -4,13 +4,13 @@ def get_next_order_id(connection):
         result = cursor.fetchone()
         return result[0]
 
-def insert_order(connection, customer_name, order_date, product_id, quantity, total_price, status):
+def insert_order(connection, customer_name, order_date, product_id, quantity, total_price):
     order_id = get_next_order_id(connection)
     with connection.cursor() as cursor:
         cursor.execute("""
             INSERT INTO orders (order_id, customer_name, order_date, product_id, quantity, total_price, status)
-            VALUES (:1, :2, TO_DATE(:3, 'yyyy-mm-dd'), :4, :5, :6, :7)
-        """, (order_id, customer_name, order_date, product_id, quantity, total_price, status))
+            VALUES (:1, :2, TO_DATE(:3, 'yyyy-mm-dd'), :4, :5, :6, '접수완료')
+        """, (order_id, customer_name, order_date, product_id, quantity, total_price))
     connection.commit()
 
 def get_orders(connection):
@@ -38,6 +38,7 @@ def get_order_statistics(connection):
             FROM products p
             LEFT JOIN orders o ON p.product_id = o.product_id
             GROUP BY p.product_id, p.product_name
+            ORDER BY p.product_id
         """)
         statistics = cursor.fetchall()
     return statistics
@@ -76,7 +77,7 @@ def process_order(connection, order_id):
             # 주문 상태 업데이트 (기존 테이블에서 처리)
             cursor.execute("""
                 UPDATE orders
-                SET status = 'Shipped'
+                SET status = '처리완료'
                 WHERE order_id = :1
             """, (order_id,))
 
