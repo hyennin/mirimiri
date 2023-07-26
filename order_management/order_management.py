@@ -43,16 +43,6 @@ def get_order_statistics(connection):
         statistics = cursor.fetchall()
     return statistics
 
-def get_products_by_name(connection, name):
-    # 상품명으로 상품 조회 (인덱스를 활용하여 검색)
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT * FROM products
-            WHERE product_name = :1
-        """, (name,))
-        products = cursor.fetchall()
-    return products
-
 def process_order(connection, order_id):
     with connection.cursor() as cursor:
         # 주문 정보 조회

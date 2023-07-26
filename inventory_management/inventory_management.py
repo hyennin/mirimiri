@@ -30,6 +30,16 @@ def get_products(connection):
         products = cursor.fetchall()
     return products
 
+def get_products_by_name(connection, name):
+    # 상품명으로 상품 조회
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT * FROM products
+            WHERE product_name LIKE '%' || :1 || '%'
+        """, (name,))
+        products = cursor.fetchall()
+    return products
+
 def describe_table(connection, table_name):
     # 테이블 구조 조회
     with connection.cursor() as cursor:

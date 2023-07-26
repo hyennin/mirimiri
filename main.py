@@ -1,7 +1,7 @@
 import cx_Oracle
 import traceback
-from order_management.order_management import process_order, insert_order, get_orders, get_order_statistics, get_products_by_name, describe_table
-from inventory_management.inventory_management import insert_product, update_stock, get_products
+from order_management.order_management import process_order, insert_order, get_orders, get_order_statistics, describe_table
+from inventory_management.inventory_management import insert_product, get_products_by_name, get_products
 
 connection = cx_Oracle.connect("mirimiri/mirim@127.0.0.1:1521/XE")
 
@@ -60,6 +60,9 @@ def create_tables():
             )
         """)
 
+    # 상품명에 대한 인덱스 생성 (새로 추가한 부분)
+    create_index(connection)
+
 def create_sequences():
     with connection.cursor() as cursor:
         # products 테이블을 위한 시퀀스 생성
@@ -77,6 +80,12 @@ def create_sequences():
                 INCREMENT BY 1
                 NOMAXVALUE
         """)
+
+def create_index(connection):
+    # 상품명에 대한 인덱스 생성
+    with connection.cursor() as cursor:
+        cursor.execute("CREATE INDEX idx_product_name ON products(product_name)")
+    connection.commit()
 
 def display_menu():
     print("=== 메뉴 ===")
