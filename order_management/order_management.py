@@ -34,7 +34,7 @@ def get_order_statistics(connection):
     # 상품별 주문 통계 조회
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT p.product_id, p.product_name, COUNT(o.order_id) as num_orders, SUM(o.quantity) as total_quantity, AVG(o.total_price) as avg_price
+            SELECT p.product_id, p.product_name, COUNT(o.order_id) as num_orders, SUM(o.quantity) as total_quantity, SUM(o.total_price) as total_price
             FROM products p
             LEFT JOIN orders o ON p.product_id = o.product_id
             GROUP BY p.product_id, p.product_name
@@ -90,3 +90,18 @@ def describe_table(connection, table_name):
             print(f"{col[0]} | {col[1]} | {'O' if col[2] == 'Y' else 'X'}")
     else:
         print("해당 테이블이 존재하지 않습니다.")
+
+def all_order(connection):
+    # 총 주문 통계 조회
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT 
+                product_id,
+                product_name,
+                num_orders,
+                total_quantity,
+                total_price
+            FROM order_statistics_view
+        """)
+        statistics = cursor.fetchall()
+    return statistics

@@ -1,9 +1,22 @@
 import cx_Oracle
 import traceback
-from order_management.order_management import process_order, insert_order, get_orders, get_order_statistics, describe_table
+from order_management.order_management import process_order, insert_order, get_orders, get_order_statistics, describe_table, all_order
 from inventory_management.inventory_management import insert_product, get_products_by_name, get_products
 
 connection = cx_Oracle.connect("mirimiri/mirim@127.0.0.1:1521/XE")
+
+def grant_create_view_privilege_to_user():
+    # 데이터베이스 관리자 계정으로 접속
+    admin_connection = cx_Oracle.connect("system/1234@127.0.0.1:1521/XE")
+    username = 'mirimiri'
+    
+    with admin_connection.cursor() as cursor:
+        try:
+            cursor.execute(f"GRANT CREATE VIEW TO {username}")
+            print(f"사용자 {username}에게 CREATE VIEW 권한이 부여되었습니다.")
+        except cx_Oracle.DatabaseError as e:
+            print(f"권한 부여 중 오류가 발생했습니다: {e}")
+    admin_connection.close()
 
 def table_exists(table_name):
     # 테이블 존재 여부 확인
@@ -61,7 +74,7 @@ def create_tables():
         """)
 
     # 상품명에 대한 인덱스 생성 (새로 추가한 부분)
-    create_index(connection)
+    create_index()
 
 def create_sequences():
     with connection.cursor() as cursor:
@@ -81,27 +94,45 @@ def create_sequences():
                 NOMAXVALUE
         """)
 
-def create_index(connection):
+def create_index():
     # 상품명에 대한 인덱스 생성
     with connection.cursor() as cursor:
         cursor.execute("CREATE INDEX idx_product_name ON products(product_name)")
     connection.commit()
 
+def create_view():
+    with connection.cursor() as cursor:
+        try:
+            cursor.execute("""
+                CREATE OR REPLACE VIEW order_statistics_view AS
+                SELECT p.product_id, p.product_name, COUNT(o.order_id) AS num_orders, SUM(o.quantity) AS total_quantity, SUM(o.total_price) AS total_price
+                FROM products p
+                LEFT JOIN orders o ON p.product_id = o.product_id
+                GROUP BY ROLLUP(p.product_id, p.product_name)
+            """)
+            print("뷰가 성공적으로 생성되었습니다.")
+        except cx_Oracle.DatabaseError as e:
+            print(f"뷰 생성 중 오류가 발생했습니다: {e}")
+
 def display_menu():
     print("=== 메뉴 ===")
     print("1. 상품 정보 조회")
     print("2. 주문 정보 조회")
-    print("3. 주문 통계 조회")
+    print("3. 상품별 주문 통계 조회")
     print("4. 상품 정보 추가")
     print("5. 주문 정보 추가")
     print("6. 특정 상품 정보 조회")
     print("7. 주문 처리")
     print("8. 테이블 구조 조회")
+    print("9. 총 주문 통계 조회")
     print("0. 종료")
     print("===========")
 
 def main():
     try:
+        # 뷰 생성과 사용자에게 권한 부여
+        grant_create_view_privilege_to_user()
+        create_view()
         while True:
             display_menu()
 
@@ -147,15 +178,15 @@ def main():
                     if not order_statistics:
                         print("주문 통계 정보가 없습니다.")
                     else:
-                        print("상품 ID | 상품명 | 주문 수 | 총 수량 | 평균 가격")
+                        print("상품 ID | 상품명 | 주문 수 | 총 수량 | 총 가격")
                         print("--------------------------------")
                         for stats in order_statistics:
                             product_id = stats[0]
                             product_name = stats[1]
                             num_orders = stats[2] if stats[2] else 0
                             total_quantity = stats[3] if stats[3] else 0
-                            avg_price = stats[4] if stats[4] else 0.0
-                            print(f"{product_id} | {product_name} | {num_orders} | {total_quantity} | {avg_price:.2f}")
+                            total_price = stats[4] if stats[4] else 0.0
+                            print(f"{product_id} | {product_name} | {num_orders} | {total_quantity} | {total_price}")
                 except Exception as e:
                     print("상품별 주문 통계 조회 중 오류가 발생했습니다.")
                     traceback.print_exc()
@@ -224,6 +255,37 @@ def main():
                 except Exception as e:
                     print("테이블 구조 조회 중 오류가 발생했습니다.")
                     traceback.print_exc()
+
+            elif choice == "9":
+                try:
+                    # 총 주문 통계 조회
+                    print("=== 총 주문 통계 ===")
+                    statistics = all_order(connection)
+                    if statistics:
+                        for stat in statistics:
+                            product_id = stat[0]
+                            product_name = stat[1]
+                            num_orders = stat[2]
+                            total_quantity = stat[3]
+                            total_price = stat[4]
+                            if product_id is None and product_name is None:
+                                print("총 상품 전체 합계")
+                            elif product_id is None:
+                                print(f"상품명: {product_name} (전체 합계)")
+                            elif product_name is None:
+                                print(f"상품 ID: {product_id} (전체 합계)")
+                            else:
+                                print(f"상품 ID: {product_id} | 상품명: {product_name}")
+                            print("총 주문 수 | 총 주문 수량 | 총 가격")
+                            print("--------------------------")
+                            print(f"{num_orders} | {total_quantity} | {total_price}")
+                            print("==========================")
+                    else:
+                        print("주문 통계 정보가 없습니다.")
+                except Exception as e:
+                    print("총 주문 통계 조회 중 오류가 발생했습니다.")
+                    traceback.print_exc()
+                    
 
             elif choice == "0":
                 print("프로그램을 종료합니다.")
