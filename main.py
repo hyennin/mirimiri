@@ -115,7 +115,7 @@ def create_view():
             print(f"뷰 생성 중 오류가 발생했습니다: {e}")
 
 def display_menu():
-    print("=== 메뉴 ===")
+    print("============== 메뉴 ==============")
     print("1. 상품 정보 조회")
     print("2. 주문 정보 조회")
     print("3. 상품별 주문 통계 조회")
@@ -126,7 +126,7 @@ def display_menu():
     print("8. 테이블 구조 조회")
     print("9. 총 주문 통계 조회")
     print("0. 종료")
-    print("===========")
+    print("==================================")
 
 def main():
     try:
@@ -141,13 +141,13 @@ def main():
             if choice == "1":
                 try:
                     # 상품 정보 조회
-                    print("=== 상품 정보 ===")
+                    print("========== 상품 정보 ==========")
                     products = get_products(connection)
                     if not products:
                         print("등록된 상품이 없습니다.")
                     else:
                         print("상품 ID | 상품명 | 가격 | 재고량")
-                        print("--------------------------")
+                        print("----------------------------------")
                         for product in products:
                             print(f"{product[0]} | {product[1]} | {product[2]} | {product[3]}")
                 except Exception as e:
@@ -157,13 +157,13 @@ def main():
             elif choice == "2":
                 try:
                     # 주문 정보 조회
-                    print("=== 주문 정보 ===")
+                    print("================== 주문 정보 ==================")
                     orders = get_orders(connection)
                     if not orders:
                         print("등록된 주문이 없습니다.")
                     else:
                         print("주문 ID | 고객명 | 주문일자 | 상품 ID | 수량 | 총 가격 | 상태")
-                        print("----------------------------------------------")
+                        print("--------------------------------------------------------------")
                         for order in orders:
                             print(f"{order[0]} | {order[1]} | {order[2]} | {order[3]} | {order[4]} | {order[5]} | {order[6]}")
                 except Exception as e:
@@ -173,13 +173,13 @@ def main():
             elif choice == "3":
                 try:
                     # 상품별 주문 통계 조회
-                    print("=== 상품별 주문 통계 ===")
+                    print("=========== 상품별 주문 통계 ===========")
                     order_statistics = get_order_statistics(connection)
                     if not order_statistics:
                         print("주문 통계 정보가 없습니다.")
                     else:
                         print("상품 ID | 상품명 | 주문 수 | 총 수량 | 총 가격")
-                        print("--------------------------------")
+                        print("-----------------------------------------------")
                         for stats in order_statistics:
                             product_id = stats[0]
                             product_name = stats[1]
@@ -194,7 +194,7 @@ def main():
             elif choice == "4":
                 try:
                     # 상품 정보 추가
-                    print("=== 상품 정보 추가 ===")
+                    print("========== 상품 정보 추가 =========")
                     product_name = input("상품명을 입력하세요: ")
                     price = float(input("가격을 입력하세요: "))
                     stock_quantity = int(input("재고량을 입력하세요: "))
@@ -207,7 +207,7 @@ def main():
             elif choice == "5":
                 try:
                     # 주문 정보 추가
-                    print("=== 주문 정보 추가 ===")
+                    print("========== 주문 정보 추가 ==========")
                     customer_name = input("고객명을 입력하세요: ")
                     order_date = input("주문 일자를 입력하세요 (yyyy-mm-dd): ")
                     product_id = int(input("상품 ID를 입력하세요: "))
@@ -222,14 +222,14 @@ def main():
             elif choice == "6":
                 try:
                     # 상품명으로 상품 조회
-                    print("=== 특정 상품 정보 조회 ===")
+                    print("========== 특정 상품 정보 조회 ==========")
                     product_name = input("조회할 상품명을 입력하세요: ")
                     products = get_products_by_name(connection, product_name)
                     if not products:
                         print("해당 상품이 없습니다.")
                     else:
                         print("상품 ID | 상품명 | 가격 | 재고량")
-                        print("--------------------------")
+                        print("----------------------------------")
                         for product in products:
                             print(f"{product[0]} | {product[1]} | {product[2]} | {product[3]}")
                 except Exception as e:
@@ -239,7 +239,7 @@ def main():
             elif choice == "7":
                 try:
                     # 주문 처리
-                    print("=== 주문 처리 ===")
+                    print("========== 주문 처리 ==========")
                     order_id = int(input("처리할 주문의 ID를 입력하세요: "))
                     process_order(connection, order_id)
                 except Exception as e:
@@ -249,7 +249,7 @@ def main():
             elif choice == "8":
                 try:
                     # 테이블 구조 조회
-                    print("=== 테이블 구조 조회 ===")
+                    print("========== 테이블 구조 조회 ==========")
                     table_name = input("조회할 테이블의 이름을 입력하세요: ")
                     describe_table(connection, table_name)
                 except Exception as e:
@@ -259,7 +259,7 @@ def main():
             elif choice == "9":
                 try:
                     # 총 주문 통계 조회
-                    print("=== 총 주문 통계 ===")
+                    print("========== 총 주문 통계 ==========")
                     statistics = all_order(connection)
                     if statistics:
                         for stat in statistics:
@@ -277,15 +277,14 @@ def main():
                             else:
                                 print(f"상품 ID: {product_id} | 상품명: {product_name}")
                             print("총 주문 수 | 총 주문 수량 | 총 가격")
-                            print("--------------------------")
+                            print("-------------------------------------")
                             print(f"{num_orders} | {total_quantity} | {total_price}")
-                            print("==========================")
+                            print("=====================================")
                     else:
                         print("주문 통계 정보가 없습니다.")
                 except Exception as e:
                     print("총 주문 통계 조회 중 오류가 발생했습니다.")
                     traceback.print_exc()
-                    
 
             elif choice == "0":
                 print("프로그램을 종료합니다.")
