@@ -11,9 +11,6 @@ def disconnect_user(admin_connection, username):
         sid, serial = session_info
         # 세션 끊기
         cursor.execute(f"ALTER SYSTEM KILL SESSION '{sid}, {serial}'")
-        print(f"사용자 {username}의 세션을 끊었습니다.")
-      else:
-        print(f"{username} 사용자의 세션을 찾을 수 없습니다.")
     except cx_Oracle.DatabaseError as e:
       print(f"세션 끊기 중 오류 발생: {e}")
 
@@ -28,9 +25,6 @@ def delete_user(admin_connection, username):
         # 세션 끊고 사용자 삭제
         disconnect_user(admin_connection, username)
         cursor.execute(f"DROP USER {username} CASCADE")
-        print(f"{username} 사용자가 삭제되었습니다.")
-      else:
-        print(f"{username} 사용자가 존재하지 않습니다.")
     except cx_Oracle.DatabaseError as e:
       print(f"사용자 삭제 중 오류 발생: {e}")
 
@@ -39,7 +33,6 @@ def create_user(admin_connection, username, password):
     try:
       cursor.execute(f"CREATE USER {username} IDENTIFIED BY {password}")
       cursor.execute(f"GRANT CONNECT, RESOURCE TO {username}")  # 필요한 권한 부여
-      print(f"{username} 사용자가 생성되었습니다.")
     except cx_Oracle.DatabaseError as e:
       print(f"사용자 생성 중 오류 발생: {e}")
 
@@ -47,7 +40,6 @@ def grant_create_view_privilege_to_user(admin_connection, username):
   with admin_connection.cursor() as cursor:
     try:
       cursor.execute(f"GRANT CREATE VIEW TO {username}")
-      print(f"사용자 {username}에게 CREATE VIEW 권한이 부여되었습니다.")
     except cx_Oracle.DatabaseError as e:
       print(f"권한 부여 중 오류가 발생했습니다: {e}")
 
@@ -149,27 +141,37 @@ def create_view(connection):
         LEFT JOIN orders o ON p.product_id = o.product_id
         GROUP BY ROLLUP(p.product_id, p.product_name)
       """)
-      print("뷰가 성공적으로 생성되었습니다.")
     except cx_Oracle.DatabaseError as e:
       print(f"뷰 생성 중 오류가 발생했습니다: {e}")
 
 def display_main():
-  print("----------------------------------------------")
-  print("|     __ __  _       _  __ __  _       _     |")
-  print("|    |  \  \<_> _ _ <_>|  \  \<_> _ _ <_>    |")
-  print("|    |     || || '_>| ||     || || '_>| |    |")
-  print("|    |_|_|_||_||_|  |_||_|_|_||_||_|  |_|    |")
-  print("----------------------------------------------")
+  print("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓")
+  print("┃    __ __  _       _  __ __  _       _                ┃")
+  print("┃   |  \  \<_> _ _ <_>|  \  \<_> _ _ <_>               ┃")
+  print("┃   |     || || '_>| ||     || || '_>| |               ┃")
+  print("┃   |_|_|_||_||_|  |_||_|_|_||_||_|  |_|               ┃")
+  print("┃                                                      ┃")
+  print("┃                                __(.)< __(.)> __(.)=  ┃")
+  print("┃                                \___)  \___)  \___)   ┃")
+  print("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛")
+  print()
+
+
 
 def display_menu():
-  print("============== 메뉴 ==============")
-  print("1. 상품 정보 조회")
-  print("2. 주문 정보 조회")
-  print("3. 상품별 주문 통계 조회")
-  print("4. 상품 정보 추가")
-  print("5. 주문 정보 추가")
-  print("6. 특정 상품 정보 조회")
-  print("7. 주문 처리")
-  print("8. 총 주문 통계 조회")
-  print("0. 종료")
-  print("==================================")
+  print()
+  print()
+  print("╔══════════ °• 메뉴 •° ══════════╗")
+  print()
+  print("  1. 상품 정보 조회")
+  print("  2. 주문 정보 조회")
+  print("  3. 상품별 주문 통계 조회")
+  print("  4. 상품 정보 추가")
+  print("  5. 주문 정보 추가")
+  print("  6. 특정 상품 정보 조회")
+  print("  7. 주문 처리")
+  print("  8. 총 주문 통계 조회")
+  print("  0. 종료")
+  print()
+  print("╚════════════════════════════════╝")
+  print()

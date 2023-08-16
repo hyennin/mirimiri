@@ -55,16 +55,15 @@ def process_order(connection, order_id):
 		if order:
 			product_id = order[3]
 			quantity = order[4]
-			total_price = order[5]
 
-			# 재고량 업데이트 (기존 테이블에서 처리)
+			# 재고량 업데이트
 			cursor.execute("""
 				UPDATE products
 				SET stock_quantity = stock_quantity - :1
 				WHERE product_id = :2
 			""", (quantity, product_id))
 
-			# 주문 상태 업데이트 (기존 테이블에서 처리)
+			# 주문 상태 업데이트
 			cursor.execute("""
 				UPDATE orders
 				SET status = '처리완료'
@@ -75,21 +74,6 @@ def process_order(connection, order_id):
 			print(f"주문(ID: {order_id})이 처리되었습니다.")
 		else:
 			print("해당 주문이 존재하지 않습니다.")
-
-def describe_table(connection, table_name):
-	# 테이블 구조 조회
-	with connection.cursor() as cursor:
-		cursor.execute(f"SELECT COLUMN_NAME, DATA_TYPE, NULLABLE FROM USER_TAB_COLUMNS WHERE TABLE_NAME = '{table_name.upper()}'")
-		columns = cursor.fetchall()
-
-	if columns:
-		print(f"=== {table_name.upper()} 테이블 구조 ===")
-		print("컬럼 이름 | 데이터 타입 | NULL 허용 여부")
-		print("--------------------------")
-		for col in columns:
-			print(f"{col[0]} | {col[1]} | {'O' if col[2] == 'Y' else 'X'}")
-	else:
-		print("해당 테이블이 존재하지 않습니다.")
 
 def all_order(connection):
 	# 총 주문 통계 조회
